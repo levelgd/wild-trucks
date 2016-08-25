@@ -8,6 +8,8 @@
 
     var mouse = new THREE.Vector2();
 
+    var textureLoader = new THREE.TextureLoader();
+
     var raydelay = 20;
     var waterdelay = 0;
 
@@ -24,7 +26,7 @@
     var video = document.querySelector("#video");
 
     var bitva = new THREE.SpriteMaterial({
-        map: THREE.ImageUtils.loadTexture("res/bitva.png"),
+        map: textureLoader.load("res/bitva.png"),
         color: 0xffffff,
         depthTest:false
     });
@@ -72,7 +74,7 @@
     var fragsG = 0;
     var fragsI = 0;
 
-    var normal = THREE.ImageUtils.loadTexture('res/bump.png');
+    var normal = textureLoader.load('res/bump.png');
     normal.wrapS = THREE.RepeatWrapping;
     normal.wrapT = THREE.RepeatWrapping;
     normal.repeat = new THREE.Vector2(2, 2);
@@ -609,8 +611,6 @@
 
             ws.onmessage = function (message) {
 
-                //console.log(message.data);
-
                 try {
                     message = JSON.parse(message.data);
                 } catch (e) {
@@ -653,7 +653,7 @@
                         };
 
                         // Load textures
-                        var waterNormals = new THREE.ImageUtils.loadTexture('res/waternormals.jpg');
+                        var waterNormals = new textureLoader.load('res/waternormals.jpg');
                         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
                         // Create the water effect
@@ -750,8 +750,11 @@
                         cinema.position.z = 70;
                         scene.add(cinema);
 
-                        if(message.webm){
-                            video.src = message.webm;
+                        //console.log(message.webm);
+
+                        if(message.webm.file){
+                            video.src = message.webm.file;
+                            video.currentTime = parseInt(message.webm.sync / 1000);
                             video.play();
                         }
 
@@ -908,6 +911,8 @@
                     case 'game-webm':
 
                         if (GAMESTATE != "run") break;
+
+                        //console.log(message);
 
                         if(video){
                             video.pause();
@@ -1159,7 +1164,7 @@
     }
 
     function loadSkyBox(scene) {
-        var aCubeMap = THREE.ImageUtils.loadTextureCube([
+        var aCubeMap = new THREE.CubeTextureLoader().load([
             'res/skybox/dust_bk.jpg',
             'res/skybox/dust_ft.jpg',
             'res/skybox/dust_up.jpg',
@@ -1203,7 +1208,7 @@
                         gruzoviquePrefab.scale.x = gruzoviquePrefab.scale.y = gruzoviquePrefab.scale.z = .005;
 
                         var gmat = new THREE.MeshLambertMaterial({
-                            map: THREE.ImageUtils.loadTexture('res/uralDiffuse.jpg')
+                            map: textureLoader.load('res/uralDiffuse.jpg')
                         });
 
                         gruzoviquePrefab.traverse(function (child) {
@@ -1220,7 +1225,7 @@
                         gitlerPrefab.scale.x = gitlerPrefab.scale.y = gitlerPrefab.scale.z = .005;
 
                         var gimat = new THREE.MeshLambertMaterial({
-                            map: THREE.ImageUtils.loadTexture('res/gitlerDiffuse.jpg')
+                            map: textureLoader.load('res/gitlerDiffuse.jpg')
                         });
 
                         gitlerPrefab.traverse(function (child) {
@@ -1294,7 +1299,7 @@
                          }*/
 
                         var m130 = new THREE.MeshPhongMaterial({
-                            map: THREE.ImageUtils.loadTexture('res/ac130.jpg'), shininess: 80
+                            map: textureLoader.load('res/ac130.jpg'), shininess: 80
                         });
 
                         ac130.traverse(function (child) {
@@ -1313,7 +1318,7 @@
                         igilPrefab.scale.x = igilPrefab.scale.y = igilPrefab.scale.z = .005;
 
                         var iimat = new THREE.MeshLambertMaterial({
-                            map: THREE.ImageUtils.loadTexture('res/kamazIgil.jpg')
+                            map: textureLoader.load('res/kamazIgil.jpg')
                         });
 
                         igilPrefab.traverse(function (child) {
@@ -1330,7 +1335,7 @@
                         zilPrefab.scale.x = zilPrefab.scale.y = zilPrefab.scale.z = .005;
 
                         var zmat = new THREE.MeshLambertMaterial({
-                            map: THREE.ImageUtils.loadTexture('res/zilDiffuse.jpg')
+                            map: textureLoader.load('res/zilDiffuse.jpg')
                         });
 
                         zilPrefab.traverse(function (child) {

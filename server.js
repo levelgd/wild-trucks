@@ -3,6 +3,8 @@
  */
 var fs = require('fs');
 var http = require('http');
+var ffprobe = require('node-ffprobe');
+var youTube = require('ytdl-core');
 var express = require('express');
 var app = express();
 
@@ -22,20 +24,16 @@ app.get('/faq/', function (req, res) {
 });
 
 app.use(function(req, res, next){
-    res.status(404).send("<h1 style='text-align: center'>leeho 404</h1>");
+    res.status(404).send("<h1 style='text-align: center'>404</h1>");
 });
 
 // для heroku следует указывать process.env.PORT в качестве порта
 var server = http.createServer(app);
-server.listen(process.env.PORT || 5000, function(){
+server.listen(80, function(){ //для хероку порт process.env.PORT || 5000
     console.log('server started');
 });
 
 //---
-
-var videos =[];
-var videoQueue = 0;
-var webm = /^https?:\/\/2ch.hk\/\w+\/src\/\d+\/\d+\.webm$/;
 
 var who = [];
 who["ural"] = "Урал";
@@ -98,31 +96,48 @@ wss.broadcast = function broadcast(data,without) {
     });
 };
 
+var videos =[];
+var videoQueue = 0;
+var webm = /^https?:\/\/2ch.hk\/\w+\/src\/\d+\/\d+\.webm$/;
+var video = /^https:\/\/www.youtube.com\/watch\?v=.*$/;
+
+var currentVideoTimestamp = 0;
+
 var lastsource = "";
 var lastwebm = "";
-var nowplaying = "";
+var nowplaying = {};
 
-// смена видеоролика каждые 3 минуты
-setInterval(function(){
-    if(videos.length > 0 && clients.length > 0){
+function playVideo() {
 
-        nowplaying = videos.splice(0,1);
+    if (videos.length > 0 && clients.length > 0) {
 
-        wss.broadcast(JSON.stringify({message:'game-webm',src:nowplaying}),null);
+        nowplaying = videos.splice(0, 1)[0];
+        console.log(nowplaying);
 
-        fs.appendFile('public/chatlog.txt', "► " + lastsource + "\n", 'utf8',function (err) {
+        wss.broadcast(JSON.stringify({message: 'game-webm', src: nowplaying.file}), null);
+
+        fs.appendFile('public/chatlog.txt', "► " + lastsource + "\n", 'utf8', function (err) {
             if (err) throw err;
         });
 
-        if(lastwebm.length > 0 && fs.existsSync(lastwebm)){
+        if (lastwebm.length > 0 && fs.existsSync(lastwebm)) {
             fs.unlinkSync(lastwebm);
         }
 
-        lastwebm = "public/" + nowplaying;
+        lastwebm = "public/" + nowplaying.file;
 
         videoQueue--;
+
+        currentVideoTimestamp = Date.now();
+
+        setTimeout(function () {
+            nowplaying = {};
+
+            playVideo();
+
+        }, 1000 * (Math.ceil(nowplaying.duration) + 1));
     }
-}, 1000 * 60 * 3);
+}
 
 wss.on('connection', function(ws) {
 
@@ -185,15 +200,14 @@ wss.on('connection', function(ws) {
                 players.push(player);
                 clients.push(ws);
 
-                ws.send(JSON.stringify({message:'game-players',players:players, mapside:mapSide, id:player.id, webm:nowplaying}), ack);
+                ws.send(JSON.stringify({message:'game-players',players:players, mapside:mapSide, id:player.id, webm:{file:nowplaying.file,sync:(Date.now() - currentVideoTimestamp)}}), ack);
 
                 wss.broadcast(JSON.stringify({message:'game-join',player:player}),ws);
                 wss.broadcast(JSON.stringify({message:'game-log',text:'Новый ' + who[message.side] + ' в игре, так сказать'}),ws);
 
                 setTimeout(function(){
-                    ws.send(JSON.stringify({message:'game-log',text:'Вы играете в Лихие Грузовики Онлайн 0.0.9 rc4 jihad and loathing on ukraine edition, ну это и так понятно. ' +
-                    'Ехать на стрелочки или WASD, чат на Enter, крутить камеру с зажатой ЛКМ. Сервер стал довольно часто падать, вероятно облако перезагружает его когда ' +
-                    'нагрузка серв выше чем можно.'}), ack);
+                    ws.send(JSON.stringify({message:'game-log',text:'Вы играете в Лихие Грузовики Онлайн 0.0.9 rc5 youtube edition, ну это и так понятно. ' +
+                    'Ехать на стрелочки или WASD, чат на Enter, крутить камеру с зажатой ЛКМ.'}), ack);
                 },1000);
 
                 break;
@@ -231,7 +245,15 @@ wss.on('connection', function(ws) {
 
                                 lastsource = message.text;
 
-                                videos.push(filename);
+                                ffprobe("public/" + filename, function(err, probeData) {
+                                    videos.push({
+                                        file:filename,
+                                        duration:probeData.format.duration
+                                    });
+
+                                    if(!nowplaying.hasOwnProperty("file")) playVideo();
+                                });
+
                                 ws.send(JSON.stringify({
                                     message: 'game-log',
                                     text: ' Видео успешно добавлено в очередь.'
@@ -251,6 +273,63 @@ wss.on('connection', function(ws) {
                     }else{
                         ws.send(JSON.stringify({ message: 'game-log', text: ' В очереди уже максимальное число вебмок, понятно что больше нельзя добавить' }), ack);
                     }
+
+                }else if(video.test(message.text)){
+
+                    youTube.getInfo(message.text, function(e, info){
+
+                        if(e){
+                            ws.send(JSON.stringify({ message: 'game-log', text: ' Видео не найдено' }), ack);
+                        }else{
+                            if(info.length_seconds < (30 * 60)){
+
+                                var videoCanDl;
+                                var container = "none";
+
+                                info.formats.forEach(function(f){
+                                    if(!videoCanDl && (f.itag == '18' || f.itag == '43')){
+                                        videoCanDl = f.itag;
+                                        container = f.container;
+                                    }
+                                });
+
+                                if(videoCanDl){
+
+                                    vid = true;
+                                    videoQueue++; //в данной версии не поддерживаются очереди видео
+
+                                    var filename = 'res/webm/' + Date.now() + "." + container;
+
+                                    youTube(message.text, { quality:videoCanDl} ).pipe(fs.createWriteStream("public/" + filename)).on('finish', function() {
+
+                                        lastsource = message.text;
+
+                                        ffprobe("public/" + filename, function(err, probeData) {
+                                            videos.push({
+                                                file:filename,
+                                                duration:probeData.format.duration
+                                            });
+
+                                            if(!nowplaying.hasOwnProperty("file")) playVideo();
+                                        });
+
+                                        ws.send(JSON.stringify({
+                                            message: 'game-log',
+                                            text: ' Видео успешно добавлено в очередь.'
+                                        }), ack);
+
+                                        vid = false;
+
+                                    });
+                                }else{
+                                    ws.send(JSON.stringify({ message: 'game-log', text: ' Подходящий формат не найден' }), ack);
+                                }
+                            }else{
+                                ws.send(JSON.stringify({ message: 'game-log', text: ' Продолжительность видео не должна превышать 30 минут' }), ack);
+                            }
+                        }
+
+                    });
 
                 }else if(!(/^\s*$/g).test(message.text)){ // Сообщение в чат
 

@@ -19,7 +19,7 @@ THREE.MTLLoader.prototype = {
 		var scope = this;
 
 		var loader = new THREE.XHRLoader( this.manager );
-		loader.setCrossOrigin( this.crossOrigin );
+		//loader.setCrossOrigin( this.crossOrigin );
 		loader.load( url, function ( text ) {
 
 			onLoad( scope.parse( text ) );
@@ -34,11 +34,11 @@ THREE.MTLLoader.prototype = {
 
 	},
 
-	setCrossOrigin: function ( value ) {
+	/*setCrossOrigin: function ( value ) {
 
 		this.crossOrigin = value;
 
-	},
+	},*/
 
 	setMaterialOptions: function ( value ) {
 
@@ -103,7 +103,7 @@ THREE.MTLLoader.prototype = {
 		}
 
 		var materialCreator = new THREE.MTLLoader.MaterialCreator( this.baseUrl, this.materialOptions );
-		materialCreator.setCrossOrigin( this.crossOrigin );
+		//materialCreator.setCrossOrigin( this.crossOrigin );
 		materialCreator.setManager( this.manager );
 		materialCreator.setMaterials( materialsInfo );
 		return materialCreator;
@@ -147,11 +147,11 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 	constructor: THREE.MTLLoader.MaterialCreator,
 
-	setCrossOrigin: function ( value ) {
+	/*setCrossOrigin: function ( value ) {
 
 		this.crossOrigin = value;
 
-	},
+	},*/
 
 	setManager: function ( value ) {
 
@@ -416,8 +416,8 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 			texture = new THREE.Texture();
 
-			loader = new THREE.ImageLoader( manager );
-			loader.setCrossOrigin( this.crossOrigin );
+			loader = new THREE.TextureLoader(manager); //new THREE.ImageLoader( manager );
+			//loader.setCrossOrigin( this.crossOrigin );
 			loader.load( url, function ( image ) {
 
 				texture.image = THREE.MTLLoader.ensurePowerOfTwo_( image );

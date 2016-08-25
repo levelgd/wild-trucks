@@ -84,7 +84,7 @@
 
 		options: options, //hack
 
-		load: function ( url, unused, onLoad, onProgress, onError ) { // unused добавлен чтоб соответствовать OBJMTLLoader'у//
+		load: function ( url, unused, onLoad, onProgress, onError ) { // unused пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ OBJMTLLoader'пїЅ//
 
 			var length = 0;
 
@@ -93,7 +93,7 @@
 				var scope = this;
 
 				var loader = new THREE.XHRLoader( this.manager );
-				loader.setCrossOrigin( this.crossOrigin );
+				//loader.setCrossOrigin( this.crossOrigin );
 				loader.load( url, function ( text ) {
 
 					var parts = url.split( '/' );
@@ -114,11 +114,11 @@
 
 		},
 
-		setCrossOrigin: function ( value ) {
+		/*setCrossOrigin: function ( value ) {
 
 			this.crossOrigin = value;
 
-		},
+		},*/
 
 		parse: function( doc ) {
 
@@ -4305,7 +4305,7 @@
 
 	function loadTextureImage ( texture, url ) {
 
-		var loader = new THREE.ImageLoader();
+		var loader = new THREE.TextureLoader(); //new THREE.ImageLoader();
 
 		loader.load( url, function ( image ) {
 

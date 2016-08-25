@@ -185,7 +185,7 @@ THREE.Water = function (renderer, camera, scene, options) {
     this.mirrorCamera = this.camera.clone();
 
     //this.texture = new THREE.WebGLRenderTarget(width, height);
-    this.texture = new THREE.ImageUtils.loadTexture('res/sea.png');
+    this.texture = new THREE.TextureLoader('res/sea.png');
     //this.tempTexture = new THREE.WebGLRenderTarget(width, height);
     //this.dummyTexture = new THREE.WebGLRenderTarget(1, 1);
 

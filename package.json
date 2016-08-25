@@ -1,18 +1,26 @@
 {
   "name": "wild-trucks",
   "version": "0.0.9",
-  "dependencies":{
-    "express": "~4.13.x",
-    "ws":"~0.8.x",
-    "compression":"~1.6.x",
-    "request":"~2.64.x"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/levelgd/wild-trucks.git"
+  },
+  "dependencies": {
+    "compression": "^1.6.2",
+    "express": "^4.14.0",
+    "get-video-duration": "0.0.1",
+    "node-ffprobe": "^1.2.2",
+    "request": "^2.74.0",
+    "ws": "^1.1.1",
+    "ytdl-core": "^0.7.17"
   },
   "author": {
-    "name": "УровеньGD",
+    "name": "levelgd",
     "email": "levelgd@gmail.com"
   },
-  "main":"server.js",
-  "scripts":{
-    "start":"node server.js"
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
   }
 }

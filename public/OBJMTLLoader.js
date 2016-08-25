@@ -21,14 +21,14 @@ THREE.OBJMTLLoader.prototype = {
 
 		var mtlLoader = new THREE.MTLLoader( this.manager );
 		mtlLoader.setBaseUrl( url.substr( 0, url.lastIndexOf( "/" ) + 1 ) );
-		mtlLoader.setCrossOrigin( this.crossOrigin );
+		//mtlLoader.setCrossOrigin( this.crossOrigin );
 		mtlLoader.load( mtlurl, function ( materials ) {
 
 			var materialsCreator = materials;
 			materialsCreator.preload();
 
 			var loader = new THREE.XHRLoader( scope.manager );
-			loader.setCrossOrigin( scope.crossOrigin );
+			//loader.setCrossOrigin( scope.crossOrigin );
 			loader.load( url, function ( text ) {
 
 				var object = scope.parse( text );
@@ -57,11 +57,11 @@ THREE.OBJMTLLoader.prototype = {
 
 	},
 
-	setCrossOrigin: function ( value ) {
+	/*setCrossOrigin: function ( value ) {
 
 		this.crossOrigin = value;
 
-	},
+	},*/
 
 	/**
 	 * Parses loaded .obj file
